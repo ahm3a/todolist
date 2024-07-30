@@ -1,39 +1,61 @@
 const express=require('express');
 const router=express.Router();
 const task=require('../services/todotaskes');
-const {verifictionuser}=require('../services/Authservices');
+const {verifictionuser,authorize}=require('../services/Authservices');
+const {trycatch} = require('../services/errors/trycatch');
+const {validatortask}= require('../services/errors/validator');
+
+
+
 
 // Get all tasks
-router.get('/todos',  (req,res)=>{
-   const json=task.gettask();
-   return res.status(200).json(json);
-});
+router.get('/todos',verifictionuser,authorize(["admin","user"]),trycatch((req,res)=>{
+    console.log(req.userid);
+    console.log(req.role);
+    const json=task.gettask(); 
+    return res.status(200).json(json);
+  
+})
+);
 
 // Create a new task
-router.post('/todos',verifictionuser,(req,res)=>{ // Add verifictionuser middleware
-    const body = req.body;
-    task.creattask(body); // Pass body to the function
-    return res.status(200).json({
-     message:"task created"
-     }); 
-});
+router.post('/todos',verifictionuser,authorize(["admin"]),validatortask,trycatch(
+    (req,res)=>{ // Add verifictionuser middleware
+        const body = req.body;
+        console.log(req.userid);
+        console.log(req.role);
+        task.creattask(body); // Pass body to the function
+        return res.status(200).json({ 
+         message:"task created"
+         }); 
+    }
+));
 
 // Update an existing task
-router.put('/todos',verifictionuser,(req,res)=>{ // Add verifictionuser middleware
-   const body=req.body;
-   task.puttask(body); // Pass body to the function
-   return res.status(200).json({
-  message:"task updated"
-  }); 
-});
+router.put('/todos',verifictionuser,authorize(["admin"]),validatortask,trycatch((req,res)=>{ // Add verifictionuser middleware
+    const body=req.body;
+    console.log(body);
+    console.log(req.userid);
+    console.log(req.role);
+    task.puttask(body); // Pass body to the function
+    return res.status(200).json({
+   message:"task updated"
+   }); 
+ }
+)); 
 
 // Delete a task
-router.delete('/todos', verifictionuser, (req, res) => { // Add verifictionuser middleware
-    const body = req.body;
-    task.deletetask(body); // Pass body to the function
-    return res.status(200).json({ // Use status 204 for deletion
-        message: "task was deleted"
-    });
-});
+router.delete('/todos', verifictionuser,authorize(["admin"]),trycatch(
+    (req, res) => { // Add verifictionuser middleware
+        const body = req.body;
+        console.log(body);
+        console.log(req.userid);
+        console.log(req.role);
+        task.deletetask(body); // Pass body to the function
+        return res.status(200).json({ // Use status 204 for deletion
+            message: "task was deleted"
+        });
+    }
+));
 
 module.exports=router;
