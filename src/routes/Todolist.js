@@ -8,12 +8,16 @@ const {validatortask}= require('../services/errors/validator');
 
 
 
+
 // Get all tasks
 router.get('/todos',verifictionuser,authorize(["admin","user"]),trycatch((req,res)=>{
     console.log(req.userid);
     console.log(req.role);
-    const json=task.gettask(); 
-    return res.status(200).json(json);
+    task.gettask(); 
+    var response = {
+        task: task
+    };
+    return res.status(200).json(response);
   
 })
 );

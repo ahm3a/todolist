@@ -1,13 +1,17 @@
+const db=require('better-sqlite3')("task.db");
+
+
 function gettask(){
-    return{
-        task1:"reading",
-        task2:"sports",
-        task3:"coding"
-    
-    }
+  const query="SELECT * FROM task";
+  const result=db.prepare(query).all();
+  return result
 }
-function creattask(){
-    console.log("task created")
+function creattask(task){
+    const query="insert into task(task1,task2,task3) values(?,?,?)";
+    const result=db.prepare(query).run(task.task1,task.task2,task.task3);
+       if(result.changes==0){
+          throw new error("task not created")
+}
 }
 function puttask(){
     console.log("task updated")
@@ -15,4 +19,10 @@ function puttask(){
 function deletetask(){
     console.log("task deleted")
 }
-module.exports = {gettask,creattask,puttask,deletetask}
+module.exports = {
+    gettask,
+    creattask,
+    puttask,
+    deletetask
+}
+
